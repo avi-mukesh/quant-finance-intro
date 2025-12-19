@@ -1,0 +1,62 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+pyvenv.cfg
+venv/
+ENV/
+env/
+.venv/
+bin/
+include/
+lib/
+lib64/
+pip-selfcheck.json
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+wheelhouse/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.cache/
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Logs, databases, env files
+*.log
+*.sqlite3
+*.db
+*.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints
+
+# Mypy / static analysis
+.mypy_cache/
+.pyre/
+.pytype/
+
+# C extensions / shared objects
+*.so
+*.dylib
