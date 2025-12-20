@@ -7,6 +7,9 @@ import scipy.optimize as optimization
 # on average there are 252 trading days in a year
 NUM_TRADING_DAYS = 252
 
+# number of portfolios to simulate
+NUM_PORTFOLIOS = 10000
+
 # stocks we are going to handle
 tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA']
 
@@ -50,8 +53,34 @@ def show_mean_variance_of_portfolio(returns, weights):
     print("Expected portfolio mean (return): ", portfolio_expected_annual_return)
     print("Annualised portfolio standard deviation (volatility): ", portfolio_annualised_volatility)
 
+def generate_portfolios(returns):
+    portfolio_means = []
+    portfolio_risks = []
+    portfolio_weights = []
+
+
+    for _ in range(NUM_PORTFOLIOS):
+        weights = np.random.rand(len(tickers))
+        weights /= np.sum(weights)
+        portfolio_weights.append(weights)
+        portfolio_means.append(np.sum(returns.mean() * weights) * NUM_TRADING_DAYS)
+        portfolio_risks.append(np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)) * NUM_TRADING_DAYS))
+
+    return np.array(portfolio_weights), np.array(portfolio_means), np.array(portfolio_risks)
+
+def show_portfolios(returns_means, returns_volatilities):
+    plt.figure(figsize = (10,6))
+    plt.scatter(returns_volatilities, returns_means, c=returns_means/returns_volatilities, marker='o')
+    plt.grid(True)
+    plt.xlabel('Expected Volatility')
+    plt.ylabel('Expected Return')
+    plt.colorbar(label='Sharpe Ratio')
+    plt.show()
+
 if __name__ == '__main__':
     dataset = download_data()
     log_daily_returns = calculate_returns(dataset)
     show_statistics(log_daily_returns)
-    show_mean_variance_of_portfolio(log_daily_returns, weights=np.array([0.2, 0.2, 0.2, 0.2, 0.1, 0.1]))
+
+    weights, means, risks = generate_portfolios(log_daily_returns)
+    show_portfolios(means, risks)
