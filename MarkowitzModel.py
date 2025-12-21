@@ -24,6 +24,7 @@ def download_data():
         ticker_price_history = ticker_data.history(start=start_date, end=end_date)['Close']
         stock_data[ticker] = ticker_price_history
 
+    # structure is {'AAPL': [apple prices], 'MSFT': [microsoft prices], ...}
     return pd.DataFrame(stock_data)
 
 def show_data(data):
@@ -38,7 +39,7 @@ def calculate_returns(data):
     return log_returns[1:]
 
 def show_statistics(returns):
-    # e.g. if AAPL returns are [0.0027, 0.0023, ..., 0.0013]
+    # e.g. if returns are {'AAPL': [0.0027, 0.0023, ..., 0.0013]}
     # we work out the average return to be e.g. 0.0018
     # and then multiply by NUM_TRADING_DAYS to annualize it to e.g. 0.0018 * 252 = 0.4536
     print(returns.mean() * NUM_TRADING_DAYS)
@@ -60,7 +61,7 @@ def generate_portfolios(returns):
 
 
     for _ in range(NUM_PORTFOLIOS):
-        weights = np.random.rand(len(tickers))
+        weights = np.random.rand(len(tickers)) # e.g. [0.2, 0.2, 0.2, 0.2, 0.1, 0.1]
         weights /= np.sum(weights)
         portfolio_weights.append(weights)
         portfolio_means.append(np.sum(returns.mean() * weights) * NUM_TRADING_DAYS)
