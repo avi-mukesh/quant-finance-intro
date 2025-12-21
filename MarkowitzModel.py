@@ -11,7 +11,7 @@ NUM_TRADING_DAYS = 252
 NUM_PORTFOLIOS = 10000
 
 # stocks we are going to handle
-tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA']
+tickers = ['AAPL', 'WMT', 'TSLA', 'GE', 'AMZN', 'DB']
 
 start_date = '2020-01-01'
 end_date = '2025-01-04'
@@ -61,8 +61,8 @@ def generate_portfolios(returns):
 
 
     for _ in range(NUM_PORTFOLIOS):
-        weights = np.random.rand(len(tickers)) # e.g. [0.2, 0.2, 0.2, 0.2, 0.1, 0.1]
-        weights /= np.sum(weights)
+        weights = np.random.rand(len(tickers)) # e.g. [0.5, 0.7, 0.2, 0.1, 0.9, 0.8]
+        weights /= np.sum(weights) # normalise to sum 1 to get [0.15625, 0.21875, 0.0625, 0.03125, 0.28125, 0.25]
         portfolio_weights.append(weights)
         portfolio_means.append(np.sum(returns.mean() * weights) * NUM_TRADING_DAYS)
         portfolio_risks.append(np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)) * NUM_TRADING_DAYS))
@@ -78,10 +78,48 @@ def show_portfolios(returns_means, returns_volatilities):
     plt.colorbar(label='Sharpe Ratio')
     plt.show()
 
+def statistics(weights, returns):
+    portfolio_return = np.sum(returns.mean()*weights) * NUM_TRADING_DAYS
+    portfolio_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)) * NUM_TRADING_DAYS)
+    portfolio_sharpe_ratio = portfolio_return / portfolio_volatility
+    return np.array([portfolio_return, portfolio_volatility, portfolio_sharpe_ratio])
+
+def min_function_sharpe(weights, returns):
+    return -statistics(weights, returns)[2]
+
+def optimize_portfolio(weights, returns):
+    # one constraint is that the sum of weights is 1
+    constraints = {'type':'eq', 'fun': lambda x: np.sum(x)-1}
+    # each weight is between 0 and 1
+    bounds = tuple((0,1) for _ in range(len(tickers)))
+    return optimization.minimize(fun=min_function_sharpe, x0=weights[0], args=(returns,), method='SLSQP', bounds=bounds, constraints=constraints)
+
+def print_optimal_portfolio(optimal_portfolio_weights, returns):
+    print("Optimal portfolio: ", optimal_portfolio_weights.round(3))
+    print('Expected return, volatility and Sharpe ratio: ', statistics(optimal_portfolio_weights.round(3), returns))
+
+def show_optimal_portfolio(portfolio_returns, portfolio_volatilies, optimal_portfolio_return, optimal_portfolio_volatility):
+    plt.figure(figsize=(10,6))
+    plt.scatter(portfolio_volatilies, portfolio_returns, c=portfolio_returns/portfolio_volatilies, marker='o')
+    plt.grid(True)
+    plt.xlabel('Expected Volatility')
+    plt.ylabel('Expected Return')
+    plt.colorbar(label='Sharpe Ratio')
+    plt.plot(optimal_portfolio_volatility, optimal_portfolio_return, 'g*', markersize=20)
+    plt.show()
+
 if __name__ == '__main__':
     dataset = download_data()
+    show_data(dataset)
+
     log_daily_returns = calculate_returns(dataset)
     show_statistics(log_daily_returns)
 
-    weights, means, risks = generate_portfolios(log_daily_returns)
-    show_portfolios(means, risks)
+    portfolio_weights, portfolio_returns, portfolio_volatilities = generate_portfolios(log_daily_returns)
+    show_portfolios(portfolio_returns, portfolio_volatilities)
+
+    optimal_portfolio = optimize_portfolio(portfolio_weights, log_daily_returns)
+    optimal_portfolio_weights = optimal_portfolio['x']
+    optimal_portfolio_return, optimal_portfolio_volatility, optimal_portfolio_sharpe_ratio = statistics(optimal_portfolio_weights, log_daily_returns)
+    print_optimal_portfolio(optimal_portfolio_weights, log_daily_returns)
+    show_optimal_portfolio(portfolio_returns, portfolio_volatilities, optimal_portfolio_return, optimal_portfolio_volatility)
