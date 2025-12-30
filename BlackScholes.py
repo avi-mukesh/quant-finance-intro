@@ -25,5 +25,5 @@ if __name__ == '__main__':
     # volatility of stock
     sigma = 0.2
 
-    print("Call option price according to Black-Scholes:", call_option_price(S, E, T, rf, sigma))
-    print("Put option price according to Black-Scholes:", put_option_price(S, E, T, rf, sigma))
+    print("Call option price according to Black-Scholes: £%.2f" % call_option_price(S, E, T, rf, sigma))
+    print("Put option price according to Black-Scholes: £%.2f" % put_option_price(S, E, T, rf, sigma))
