@@ -30,7 +30,7 @@ def monte_carlo_simulation(F, r0, kappa, theta, sigma, T=1):
     discounted = np.exp(-integrals_for_each_simulation)
     bond_price = F * np.mean(discounted)
 
-    print('Bond price based on Monte-Carlo simulation: %.2f' % bond_price)
+    print('Bond price based on Monte-Carlo simulation: £%.2f' % bond_price)
 
     return simulation_data
 
