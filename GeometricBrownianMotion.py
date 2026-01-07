@@ -24,5 +24,5 @@ def plot_simulation(t, S):
     plt.show()
 
 if __name__ == '__main__':
-    t, S = simulate_geometric_random_walk(0)
+    t, S = simulate_geometric_random_walk(10)
     plot_simulation(t, S)
