@@ -19,8 +19,12 @@ class StockData:
 
         self.data = pd.DataFrame(data)
     
-    def calculate_daily_returns(self):
+    def calculate_log_daily_returns(self):
         self.returns = np.log(self.data / self.data.shift(1))
+        self.returns = self.returns[1:]
+        
+    def calculate_daily_returns(self):
+        self.returns = (self.data - self.data.shift(1))/self.data.shift(1)
         self.returns = self.returns[1:]
 
     def returns_histogram(self):
@@ -36,13 +40,13 @@ class StockData:
         print('mean: ', mean)
         print('var: ', variance)
 
-        plt.hist(self.returns, bins=700)
+        plt.hist(self.returns, bins=80)
         plt.plot(x, y)
         plt.show()
 
 
 if __name__ == '__main__':
-    stockData = StockData('AAPL', '2015-01-01', '2025-01-01')
+    stockData = StockData('MSFT', '2016-01-01', '2026-01-01')
     stockData.download_data()
     stockData.calculate_daily_returns()
     stockData.returns_histogram()
