@@ -1,7 +1,7 @@
 import numpy as np
-import math
 from random import random
 import matplotlib.pyplot as plt
+plt.style.use("seaborn-v0_8-darkgrid")
 import matplotlib.animation as animation
 
 num_steps = 10
@@ -20,12 +20,9 @@ for _ in range(num_steps):
     y_t.append(-1 if random()<0.5 else 1)
 x_t = np.cumsum(y_t)
 
-print(t)
-print(x_t)
-
 # initialize an empty Line2D artist
 line = ax.plot([],[])[0]
-ax.set(xlim=[0,num_steps], ylim=[-num_steps//2-1,num_steps//2+1], xlabel='t', title='1D Simple Random Walk')
+ax.set(xlim=[0,num_steps], ylim=[-num_steps//2-1,num_steps//2+1], xlabel='t', ylabel='$X_t$', title='1D Simple Random Walk')
 # set ticks at every integer step
 ax.set_xticks(np.arange(0, num_steps+1, 1))
 ax.set_yticks(np.arange(-num_steps//2-1, num_steps//2+2, 1))
@@ -40,4 +37,8 @@ def update(frame):
     return line,
 
 ani = animation.FuncAnimation(fig, update, frames=num_steps+1, interval=1200)
+
+FFwriter = animation.FFMpegWriter(fps=1)
+ani.save('animation.mp4', writer = FFwriter)
+
 plt.show()
