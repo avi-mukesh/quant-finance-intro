@@ -50,7 +50,7 @@ C = np.array([[s1**2, s1*s2*p12, s1*s3*p13],
               [s1*s2*p12, s2**2, s2*s3*p23],
               [s1*s3*p13, s2*s3*p23, s3**2]])
 
-
+# alternatively to construct C, can do vols @ corr @ vols where vols is diagonal matrix containing volatilities
 
 # Scatter plot of many different portfolios, each with a different combination of the 3 assets
 portfolio_means, portfolio_volatilities = generate_portfolios(m, C)
