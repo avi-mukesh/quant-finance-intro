@@ -55,13 +55,13 @@ C = np.array([[s1**2, s1*s2*p12, s1*s3*p13],
 # Scatter plot of many different portfolios, each with a different combination of the 3 assets
 portfolio_means, portfolio_volatilities = generate_portfolios(m, C)
 fig, ax = plt.subplots(figsize=(7, 5))
-ax.scatter(portfolio_volatilities, portfolio_means, s=1, color='darksalmon')
+# ax.scatter(portfolio_volatilities, portfolio_means, s=1, color='darksalmon')
 
 
 # Minimum Variance Line
 mu_vals = np.linspace(min(portfolio_means), max(portfolio_means), 100000)
 sigma_vals = minimum_variance_line(mu_vals, m, C)
-ax.plot(sigma_vals, mu_vals, color='maroon', linewidth=3, label='Minimum Variance Line')
+# ax.plot(sigma_vals, mu_vals, color='maroon', linewidth=3, label='MVL')
 
 # Efficient Frontier
 u = np.ones(len(m))
@@ -89,22 +89,49 @@ def animate(gradient):
 gradients = np.linspace(0.15, highest_sharpe, 100)
 frames = np.concatenate((gradients, gradients[::-1])) # for reversing the animation
 ax.scatter([0], [R], color='teal', marker='o', s=50, label='Risk-free asset')
-anim = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=True, interval=20)
+# anim = animation.FuncAnimation(fig, animate, frames=frames, blit=True, repeat=True, interval=20)
 
 # Mark where the tangency portfolio is
-ax.plot(sigma_market, mu_market, '*', markersize=20, color='gold', label='Tangency Portfolio')
+ax.plot(sigma_market, mu_market, '*', markersize=20, color='gold', label='Market Portfolio')
 
 # Capital Market Line - line with highest gradient/Sharpe ratio
 mu_vals_for_cml_line = draw_line_from_point(sigma_vals_for_line, highest_sharpe, R)
 ax.plot(sigma_vals_for_line, mu_vals_for_cml_line, color='black', linewidth=3, label='CML')
 
-ax.set_xlim(0, 0.7)
-ax.set_ylim(0, 0.3)
+
+# Introduce another risky portfolio (e.g. Apple)
+w_V = np.array([-1.8, 1.2, 1.6])
+w_V /= np.sum(w_V)
+mu_V = w_V @ m
+sigma_V = np.sqrt(w_V @ C @ w_V.T)
+
+# Correlation of this portfolio with market portfolio (e.g. S&P500)
+cov_VM = w_V @ C @ w_market.T
+rho_VM = cov_VM / (sigma_V * sigma_market)
+
+# We plot it parametrically because we have mu_v(w) = ... and sigma_v(w) = ...
+w_vals = np.linspace(-3, 2, 400)[::-1]
+# Risk and return of portfolios that are linear combinations of V and M
+mu_p = w_vals*mu_V + (1-w_vals)*mu_market
+sigma_p = np.sqrt(w_vals**2 * sigma_V**2 + (1-w_vals)**2 * sigma_market**2 + 2*w_vals*(1-w_vals)*sigma_V*sigma_market*rho_VM)
+# We get another hyperbola that is tangent to the efficient frontier
+hyperbola_line, = ax.plot(sigma_p, mu_p, color='orange', linewidth=2, label='Mix of M and V')
+def animate_hyperbola(i):
+    hyperbola_line.set_data(sigma_p[:i], mu_p[:i])
+    return hyperbola_line,
+# anim = animation.FuncAnimation(fig, animate_hyperbola, frames=len(w_vals), interval=20, blit=True)
+ax.scatter(sigma_V, mu_V, color='purple', s=80, label='Portfolio V')
+
+
+ax.set_xlim(0, 0.9)
+ax.set_ylim(0, 0.35)
 ax.set_xlabel('$\sigma$ (portfolio volatility)', fontsize=16)
 ax.set_ylabel('$\mu$ (portfolio mean)', fontsize=16)
 ax.set_title('Geometry of CAPM', fontsize=18, pad=10)
-ax.legend(fontsize=14)
+ax.legend(fontsize=12)
 
-anim.save('lines.mp4', writer = animation.FFMpegWriter(fps=40))
+# anim.save('mixture_hyperbola.mp4', writer = animation.FFMpegWriter(fps=40))
+
+ax.annotate("$w=0$", xy=(0.37, 0.23), fontsize=14)
 
 plt.show()
