@@ -10,27 +10,23 @@ class OptionsPricing:
         self.iterations = iterations
     
     def call_option_simulation(self):
-        rand = np.random.normal(0, 1, [1, self.iterations])
+        z = np.random.normal(0, 1, self.iterations)
 
         # simulate stock price at time T by simulating dS_t = \r_f*S_t*dt + \sigma * S_t * dW_t^Q
         # notice we are using risk neutral measure and using r_f instead of mu now
-        stock_price_simulations = self.S0 * np.exp((self.rf - 0.5 * self.sigma ** 2)*self.T + self.sigma * np.sqrt(self.T) * rand)
+        # expected growth of asset = risk-free rate - the entire foundation of risk-free pricing
+        stock_price_simulations = self.S0 * np.exp((self.rf - 0.5 * self.sigma ** 2)*self.T + self.sigma * np.sqrt(self.T) * z)
         
-        # just two columns, first column will be 0s
-        option_data = np.zeros([self.iterations, 2])
-        # second column is S-E
-        option_data[:, 1] = stock_price_simulations - self.E
-        # payoff is max(S-E, 0)
-        payoffs = np.max(option_data, axis=1)
+        payoffs = np.maximum(stock_price_simulations - self.E, 0)
         # work out the average payoff amongst all simulations
         avg_payoff = np.mean(payoffs)
         # discount to present time
         return avg_payoff * np.exp(-self.rf * self.T)
     
     def put_option_simulation(self):
-        rand = np.random.normal(0, 1, [1, self.iterations])
+        z = np.random.normal(0, 1, self.iterations)
 
-        stock_price_simulations = self.S0 * np.exp((self.rf - 0.5 * self.sigma ** 2)*self.T + self.sigma * np.sqrt(self.T) * rand)
+        stock_price_simulations = self.S0 * np.exp((self.rf - 0.5 * self.sigma ** 2)*self.T + self.sigma * np.sqrt(self.T) * z)
         
         option_data = np.zeros([self.iterations, 2])
         
@@ -42,6 +38,6 @@ class OptionsPricing:
         return avg_payoff * np.exp(-self.rf * self.T)
 
 if __name__ == '__main__':
-    op = OptionsPricing(100, 100, 1, 0.05, 0.2, 50000)
+    op = OptionsPricing(100, 100, 1, 0.05, 0.2, 1000000)
     print('Value of call option £%.2f' % op.call_option_simulation())
     print('Value of put option £%.2f' % op.put_option_simulation())

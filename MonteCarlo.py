@@ -24,7 +24,10 @@ def stock_monte_carlo(S0, mu, sigma, N=1000):
     plt.figure(figsize=(10,6))
     plt.plot(simulation_data)
     plt.plot(mean, linewidth=3, color='black', label='Average')
-    plt.legend()
+    plt.xlabel('Time', fontsize=16)
+    plt.ylabel('Stock price', fontsize=16)
+    plt.legend(fontsize=16)
+    plt.title('Monte Carlo', fontsize=18)
     plt.show()
 
 
